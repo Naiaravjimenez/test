@@ -1,0 +1,28 @@
+PROGRAMA BASICO KOP (LADDER) - MARCHA / PARO DE MOTOR
+====================================================
+PLC: Siemens S7-1200 / S7-1500 - TIA Portal - Lenguaje KOP
+
+TABLA DE VARIABLES:
+E0.0 - Pulsador_Marcha (contacto NA)
+E0.1 - Pulsador_Paro (contacto NC)
+E0.2 - Paro_Emergencia (contacto NC)
+A0.0 - Motor (bobina)
+
+NETWORK 1 - ENCLAVAMIENTO:
+E0.0   E0.1   E0.2   A0.0
+--| |--|/|---|/|---+--( )--
+      A0.0          |
+      --| |---------+
+
+FUNCIONAMIENTO:
+1. Pulsas E0.0 -> se activa A0.0
+2. A0.0 queda enclavado por su propio contacto en paralelo
+3. Pulsas E0.1 -> se apaga A0.0
+4. Si E0.2 se abre (emergencia) -> se apaga todo
+
+PASOS EN TIA PORTAL:
+1. Crear FC nuevo, lenguaje KOP
+2. Network 1: insertar 3 contactos en serie + bobina
+3. Asignar E0.0, E0.1, E0.2 y A0.0
+4. Insertar rama en paralelo a E0.0 con contacto A0.0
+5. Cargar al PLC y probar
