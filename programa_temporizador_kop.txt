@@ -1,32 +1,48 @@
-PROGRAMA BASICO KOP 2 - MOTOR CON TEMPORIZADOR (TON)
-=====================================================
+PROGRAMA BASICO KOP 2 - MOTOR CON TEMPORIZADOR (TON) + MODOS MANUAL/AUTO
+======================================================================
 PLC: Siemens S7-1200 / S7-1500 - TIA Portal - Lenguaje KOP
+Rama: feature_b (base feature_a)
 
 TABLA DE VARIABLES:
 E0.0 - Pulsador_Marcha (contacto NA)
-E0.1 - Pulsador_Paro (contacto NC)
+E0.1 - Pulsador_Paro (contacto NC, global ambos modos)
+E0.2 - Selector_Modo (0=Manual / 1=Auto)
 A0.0 - Motor (bobina)
-T1   - Temporizador TON (apagado retardado 5s)
+T1   - Temporizador TON (apagado retardado 5s, solo en Auto)
 
-NETWORK 1 - MARCHA / PARO CON ENCLAVAMIENTO:
+NETWORK 1 - MARCHA / PARO CON ENCLAVAMIENTO (BASE):
 E0.0   E0.1   A0.0
 --| |--|/|---+--( )--
       A0.0  |
       --| |--+
 
-NETWORK 2 - PARO AUTOMATICO A LOS 5s:
-A0.0   T1 (TON 5s)   A0.0
---| |---[TON PT=5s]--+--(R)--
-         Q ----------+
+NETWORK 2 - SELECCION MANUAL / AUTO:
+Manual (E0.2=0): bypasa T1, motor queda enclavado hasta E0.1
+--|/| E0.2 Manual + A0.0 --> Motor en Manual
+Auto (E0.2=1): habilita T1 con IN := A0.0 AND E0.2
+--| |-- E0.2 Auto + A0.0 --> habilita TON
+
+NETWORK 3 - PARO AUTOMATICO A LOS 5s SOLO EN AUTO:
+A0.0   E0.2   T1 (TON 5s)   A0.0
+--| |--| |---[TON PT=5s]--+--(R)--
+         Q ---------------+
+IN := A0.0 AND E0.2, Q hace reset de A0.0
 
 FUNCIONAMIENTO:
-1. Pulsas E0.0 -> arranca Motor A0.0
-2. Se activa el temporizador T1
-3. A los 5 segundos, T1 corta el motor automaticamente
-4. E0.1 permite paro manual en cualquier momento
+MODO MANUAL (E0.2=0):
+1. Pulsas E0.0 -> arranca Motor A0.0 con enclavamiento
+2. T1 no cuenta (IN=FALSE), no hay paro automatico
+3. E0.1 permite paro manual en cualquier momento
+MODO AUTO (E0.2=1):
+1. Pulsas E0.0 -> arranca Motor A0.0 con enclavamiento
+2. Se activa el temporizador T1 (IN := A0.0 AND E0.2)
+3. A los 5 segundos, T1 corta el motor automaticamente via (R)
+4. E0.1 permite paro manual anticipado y rearme de T1
+NOTA: cambiar E0.2 con motor en marcha exige pulsar E0.1 antes.
 
 PASOS EN TIA PORTAL:
 1. FC nuevo en KOP, Network 1 como enclavamiento clasico
-2. Network 2: inserta TON con PT:=T#5S, IN:=A0.0
-3. Usa el contacto Q del TON para hacer reset de A0.0
-4. Cargar al PLC y probar
+2. Network 2: contactos E0.2 Manual (-- |/|) y E0.2 Auto (-- | |--)
+3. Network 3: inserta TON con PT:=T#5S, IN:=A0.0 AND E0.2
+4. Usa el contacto Q del TON para hacer reset (R) de A0.0
+5. Cargar al PLC y probar en Manual (E0.2=0) y Auto (E0.2=1)
