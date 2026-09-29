@@ -1,0 +1,11 @@
+TEXTO DE EJEMPLO - RAMA FEATURE_A
+================================
+Este es un fichero de texto de ejemplo.
+
+Sirve para probar el flujo de trabajo con ramas en git:
+- master (estable)
+- develop (desarrollo)
+- feature_a (nueva funcionalidad)
+
+Fecha: 2026-09-29
+Rama: feature_a
