@@ -1,0 +1,32 @@
+PROGRAMA BASICO KOP 2 - MOTOR CON TEMPORIZADOR (TON)
+=====================================================
+PLC: Siemens S7-1200 / S7-1500 - TIA Portal - Lenguaje KOP
+
+TABLA DE VARIABLES:
+E0.0 - Pulsador_Marcha (contacto NA)
+E0.1 - Pulsador_Paro (contacto NC)
+A0.0 - Motor (bobina)
+T1   - Temporizador TON (apagado retardado 5s)
+
+NETWORK 1 - MARCHA / PARO CON ENCLAVAMIENTO:
+E0.0   E0.1   A0.0
+--| |--|/|---+--( )--
+      A0.0  |
+      --| |--+
+
+NETWORK 2 - PARO AUTOMATICO A LOS 5s:
+A0.0   T1 (TON 5s)   A0.0
+--| |---[TON PT=5s]--+--(R)--
+         Q ----------+
+
+FUNCIONAMIENTO:
+1. Pulsas E0.0 -> arranca Motor A0.0
+2. Se activa el temporizador T1
+3. A los 5 segundos, T1 corta el motor automaticamente
+4. E0.1 permite paro manual en cualquier momento
+
+PASOS EN TIA PORTAL:
+1. FC nuevo en KOP, Network 1 como enclavamiento clasico
+2. Network 2: inserta TON con PT:=T#5S, IN:=A0.0
+3. Usa el contacto Q del TON para hacer reset de A0.0
+4. Cargar al PLC y probar
